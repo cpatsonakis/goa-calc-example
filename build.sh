@@ -4,7 +4,7 @@ goa gen github.com/cpatsonakis/goa-calc-example/design/demo
 
 goa example github.com/cpatsonakis/goa-calc-example/design/demo 
 
-rm -rf calc.go
+# rm -rf calc.go
 
 echo '
 package calcapi
@@ -29,7 +29,7 @@ func NewCalc(logger *log.Logger) calc.Service {
 }
 
 // Multiply implements multiply.
-func (s *calcsrvc) Multiply(ctx context.Context, p *calc.MultiplyPayload) (res string, err error) {
+func (s *calcsrvc) Multiply(ctx context.Context, p *calc.MultiplicationPayload) (res string, err error) {
 	s.logger.Print("calc.multiply")
 	return fmt.Sprintf("%d", p.A*p.B), nil
 }
