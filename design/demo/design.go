@@ -29,6 +29,74 @@ var MultiplicationPayload = Type("MultiplicationPayload", func() {
 	Required("a", "b")
 })
 
+var BadRequestError = ResultType("application/json", func() {
+	Description("Describes the format and properties of an error returned due to a bad request.")
+	//Reference(ErrorResult)
+	TypeName("BadRequestError")
+	//ErrorName("name", String, "BadRequestError")
+	Attribute("name", String, func() {
+		Example("default", "kapoio name sfalmatos")
+	})
+	Attribute("message", String, func() {
+		Example("default", "kapoio minima sfalmatos")
+	})
+	Attribute("occured_at", String, func() {
+		Meta("openapi:example", "true")
+		Format(FormatDateTime)
+	})
+
+	Required("name", "message", "occured_at")
+})
+
+var CustomErrorType = Type("CustomError", func() {
+	// The "name" attribute is used to select the error response.
+	// name should be set to either "internal_error" or "bad_request" by
+	// the service method returning the error.
+	Description("Describes the format and properties of an error returned due to a bad request.")
+	ErrorName("name", String, "Name of error.")
+	Attribute("message", String, "Message of error.")
+	Attribute("occurred_at", String, "Time error occurred.", func() {
+		Format(FormatDateTime)
+	})
+	Required("name", "message", "occurred_at")
+})
+
+// var CustomErrorTypeRef = Type("CustomErrorTypeRef", ErrorResult, func() {
+// 	// The "name" attribute is used to select the error response.
+// 	// name should be set to either "internal_error" or "bad_request" by
+// 	// the service method returning the error.
+// 	Description("Describes the format and properties of an error returned due to a bad request ref.")
+// 	// ErrorName("name", String, "Name of error.")
+// 	// Attribute("message", String, "Message of error.")
+// 	// Attribute("occurred_at", String, "Time error occurred.", func() {
+// 	// 	Format(FormatDateTime)
+// 	// })
+// 	ErrorResult.Find("temporary").UserExamples = []*expr.ExampleExpr{
+// 		{Summary: "asdfasdf",
+// 			Description: "52t24",
+// 			Value:       false,
+// 		},
+// 	}
+// 	View("default", func() {
+// 		Attribute("name")
+// 		Attribute("message")
+// 		Attribute("id")
+// 		Attribute("timeout", func() {
+// 			Example("default", "false")
+// 		})
+// 		Attribute("fault", func() {
+// 			Example("default", "false")
+// 		})
+// 	})
+
+// 	Required("name", "message", "id", "temporary", "timeout", "fault")
+// })
+
+var CustomErrorTypeRef = Type("CustomErrorTypeRef", ErrorResult, func() {
+	Meta("openapi:example", "false")
+	Required("name", "message", "id", "temporary", "timeout", "fault")
+})
+
 var _ = Service("calc", func() {
 	Description("The calc service performs operations on numbers.")
 
@@ -53,10 +121,16 @@ var _ = Service("calc", func() {
 			Example("Server failure while attempting to multiply provided integer values.")
 		})
 
-		Error("bad_request", StringError, func() {
-			Example("A stringified message describing why the request was rejected.")
-		})
+		// Error("bad_request", StringError, func() {
+		// 	Example("A stringified message describing why the request was rejected.")
+		// })
 
+		//Error("bad_request")
+		// Error("bad_request", CustomErrorTypeRef, func() {
+		// 	Meta("openapi:example", "false")
+		// })
+
+		Error("bad_request", BadRequestError)
 		Result(String, "Multiplication result.", func() {
 			Example("default", "15")
 		})
@@ -75,9 +149,11 @@ var _ = Service("calc", func() {
 				ContentType("text/plain")
 			})
 
-			Response("bad_request", StatusBadRequest, func() {
-				ContentType("text/plain")
-			})
+			// Response("bad_request", StatusBadRequest, func() {
+			// 	ContentType("text/plain")
+			// })
+
+			Response("bad_request", StatusBadRequest)
 
 			Response(StatusGatewayTimeout, func() {
 				Body(Empty)

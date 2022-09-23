@@ -1,10 +1,10 @@
 #!/bin/bash
 
 goa gen github.com/cpatsonakis/goa-calc-example/design/demo
-
+sleep 2;
 goa example github.com/cpatsonakis/goa-calc-example/design/demo 
 
-# rm -rf calc.go
+rm -rf calc.go
 
 echo '
 package calcapi
@@ -36,3 +36,5 @@ func (s *calcsrvc) Multiply(ctx context.Context, p *calc.MultiplicationPayload) 
 ' > calc.go
 
 go build ./cmd/calc && go build ./cmd/calc-cli
+
+./calc
