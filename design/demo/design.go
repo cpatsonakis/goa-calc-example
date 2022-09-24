@@ -2,6 +2,7 @@ package design
 
 import (
 	. "goa.design/goa/v3/dsl"
+	cors "goa.design/plugins/v3/cors/dsl"
 )
 
 var _ = API("calc", func() {
@@ -11,6 +12,12 @@ var _ = API("calc", func() {
 		Host("localhost", func() {
 			URI("http://localhost:8000")
 		})
+	})
+	cors.Origin("*", func() {
+		cors.Methods("GET", "POST")
+		cors.Headers("*")
+		cors.Credentials()
+		cors.MaxAge(600)
 	})
 })
 
