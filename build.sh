@@ -1,6 +1,6 @@
 #!/bin/bash
 
-goa gen github.com/cpatsonakis/goa-calc-example/design/demo
+goa gen github.com/cpatsonakis/goa-calc-example/design/demo ; cp -R gen/http/openapi3.json static/swagger-ui/
 sleep 2;
 goa example github.com/cpatsonakis/goa-calc-example/design/demo 
 

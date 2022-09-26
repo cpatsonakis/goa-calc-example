@@ -8,11 +8,14 @@ import (
 var _ = API("calc", func() {
 	Title("Calculator Service")
 	Description("Service for multiplying numbers, a Goa teaser")
-	Server("calc", func() {
-		Host("localhost", func() {
-			URI("http://localhost:8000")
-		})
-	})
+	// Server("calc", func() {
+	// 	// Host("localhost", func() {
+	// 	// 	URI("http://localhost:8000")
+	// 	// })
+	// 	Host("default", func() {
+	// 		URI("http://localhost:8000")
+	// 	})
+	// })
 	cors.Origin("*", func() {
 		cors.Methods("GET", "POST")
 		cors.Headers("*")
