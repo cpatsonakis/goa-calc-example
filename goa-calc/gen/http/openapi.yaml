@@ -1,0 +1,143 @@
+swagger: "2.0"
+info:
+    title: Calculator Service
+    description: Service for multiplying numbers - Goa's teaser (with some minor additions for experimentation purposes).
+    version: ""
+host: localhost:80
+consumes:
+    - application/json
+    - application/xml
+    - application/gob
+produces:
+    - application/json
+    - application/xml
+    - application/gob
+paths:
+    /multiply/{a}/{b}:
+        get:
+            tags:
+                - calc
+            summary: Integer multiplication
+            description: Multiply two integers a and b and get the result in the response's body.
+            externalDocs:
+                description: Multiplication documentation
+                url: http://there-is-no-multiplication-docs.com
+            operationId: calc#multiply
+            produces:
+                - text/plain
+            parameters:
+                - name: a
+                  in: path
+                  description: First operand of the multiplication operation.
+                  required: true
+                  type: integer
+                  format: int64
+                - name: b
+                  in: path
+                  description: Second operand of the multiplication operation.
+                  required: true
+                  type: integer
+                  format: int64
+            responses:
+                "200":
+                    description: Successful integer multiplication response.
+                    schema:
+                        type: string
+                "400":
+                    description: Bad request server response.
+                    schema:
+                        $ref: '#/definitions/CalcMultiplyBadRequestResponseBody'
+                        required:
+                            - name
+                            - message
+                            - occured_at
+                "500":
+                    description: Internal server error response.
+                    schema:
+                        $ref: '#/definitions/CalcMultiplyInternalErrorResponseBody'
+                        required:
+                            - name
+                            - message
+                            - occured_at
+            schemes:
+                - http
+    /openapi.json:
+        get:
+            tags:
+                - docs
+            summary: OpenAPI 2.0 service definition.
+            description: Retrieve a JSON document containing the API's OpenAPI 2.0 definition.
+            operationId: docs#/openapi.json
+            responses:
+                "200":
+                    description: File downloaded
+                    schema:
+                        type: file
+            schemes:
+                - http
+    /openapi3.json:
+        get:
+            tags:
+                - docs
+            summary: OpenAPI 3.0 service definition.
+            description: Retrieve a JSON document containing the API's OpenAPI 3.0 definition.
+            operationId: docs#/openapi3.json
+            responses:
+                "200":
+                    description: File downloaded
+                    schema:
+                        type: file
+            schemes:
+                - http
+definitions:
+    CalcMultiplyBadRequestResponseBody:
+        title: CalcMultiplyBadRequestResponseBody
+        type: object
+        properties:
+            message:
+                type: string
+                description: Descriptive error message.
+                example: Something went wrong.
+            name:
+                type: string
+                description: Name of the error.
+                example: Illo aut.
+            occured_at:
+                type: string
+                description: Timestamp of error's occurence.
+                example: "1986-03-16T07:32:51Z"
+                format: date-time
+        description: Bad request response.
+        example:
+            message: Something went wrong.
+            name: Nostrum cumque deserunt labore hic.
+            occured_at: "1978-05-13T06:39:17Z"
+        required:
+            - name
+            - message
+            - occured_at
+    CalcMultiplyInternalErrorResponseBody:
+        title: CalcMultiplyInternalErrorResponseBody
+        type: object
+        properties:
+            message:
+                type: string
+                description: Descriptive error message.
+                example: Something went wrong.
+            name:
+                type: string
+                description: Name of the error.
+                example: Tempora atque.
+            occured_at:
+                type: string
+                description: Timestamp of error's occurence.
+                example: "1972-01-02T14:05:37Z"
+                format: date-time
+        example:
+            message: Something went wrong.
+            name: Illum ea velit.
+            occured_at: "1974-06-08T02:31:15Z"
+        required:
+            - name
+            - message
+            - occured_at
