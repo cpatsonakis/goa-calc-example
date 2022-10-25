@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -13,6 +14,7 @@ import (
 	calc "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/calc"
 	calcsvr "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/http/calc/server"
 	docssvr "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/http/docs/server"
+	httpswagger "github.com/swaggo/http-swagger"
 	goahttp "goa.design/goa/v3/http"
 	httpmdlwr "goa.design/goa/v3/http/middleware"
 	"goa.design/goa/v3/middleware"
@@ -78,10 +80,11 @@ func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpo
 		handler = httpmdlwr.Log(adapter)(handler)
 		handler = httpmdlwr.RequestID()(handler)
 	}
-
+	serveFile(mux)
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: u.Host, Handler: handler, ReadHeaderTimeout: time.Second * 60}
+
 	for _, m := range calcServer.Mounts {
 		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 	}
@@ -122,4 +125,34 @@ func errorHandler(logger *log.Logger) func(context.Context, http.ResponseWriter,
 		_, _ = w.Write([]byte("[" + id + "] encoding: " + err.Error()))
 		logger.Printf("[%s] ERROR: %s", id, err.Error())
 	}
+}
+
+// func serveFile(mux goahttp.Muxer) {
+// 	dir := http.Dir("static/swagger-ui")
+
+// 	handler := http.StripPrefix("/swaggerui/", http.FileServer(dir))
+// 	mux.Handle(http.MethodGet, "/swaggerui/", func(w http.ResponseWriter, r *http.Request) {
+// 		fmt.Printf("%v\n", r)
+// 		handler.ServeHTTP(w, r)
+// 	})
+// 	mux.Handle(http.MethodGet, "/swaggerui/{file}", func(w http.ResponseWriter, r *http.Request) {
+// 		fmt.Println(r)
+// 		handler.ServeHTTP(w, r)
+// 	})
+// }
+
+func serveFile(mux goahttp.Muxer) {
+	// httpswagger.Handler(
+	// 	httpswagger.URL("http://localhost:8080/swagger/openapi3.json")
+	// )
+	mux.Handle(http.MethodGet, "/swagger/*", httpswagger.Handler(
+		httpswagger.URL("http://localhost:8080/swagger/openapi3.json"),
+	))
+	dir := http.Dir("goa-calc/gen/http")
+
+	handler := http.StripPrefix("/swagger/", http.FileServer(dir))
+	mux.Handle(http.MethodGet, "/swagger/openapi3.json", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Printf("%v\n", r)
+		handler.ServeHTTP(w, r)
+	})
 }
