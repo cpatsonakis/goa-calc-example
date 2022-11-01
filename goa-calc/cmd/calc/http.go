@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 	calc "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/calc"
 	calcsvr "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/http/calc/server"
 	docssvr "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/http/docs/server"
-	httpswagger "github.com/swaggo/http-swagger"
+	goopenapi "github.com/go-openapi/runtime/middleware"
 	goahttp "goa.design/goa/v3/http"
 	httpmdlwr "goa.design/goa/v3/http/middleware"
 	"goa.design/goa/v3/middleware"
@@ -72,6 +73,9 @@ func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpo
 	// Configure the mux.
 	calcsvr.Mount(mux, calcServer)
 	docssvr.Mount(mux, docsServer)
+	//serveSwaggerUI(mux)
+	serveSwaggerUI("/home/kasdeya/repos/git/cpatsonakis/goa-calc-example/goa-calc/gen/http/openapi3.json",
+		"http://localhost:8080", mux)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
 	// here apply to all the service endpoints.
@@ -80,7 +84,6 @@ func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpo
 		handler = httpmdlwr.Log(adapter)(handler)
 		handler = httpmdlwr.RequestID()(handler)
 	}
-	serveFile(mux)
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: u.Host, Handler: handler, ReadHeaderTimeout: time.Second * 60}
@@ -127,32 +130,79 @@ func errorHandler(logger *log.Logger) func(context.Context, http.ResponseWriter,
 	}
 }
 
-// func serveFile(mux goahttp.Muxer) {
-// 	dir := http.Dir("static/swagger-ui")
+// func serveSwaggerUI(mux goahttp.Muxer) {
+// 	dirString, err := os.Getwd()
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	fmt.Printf("Current wd: %s\n", dirString)
 
-// 	handler := http.StripPrefix("/swaggerui/", http.FileServer(dir))
-// 	mux.Handle(http.MethodGet, "/swaggerui/", func(w http.ResponseWriter, r *http.Request) {
+// 	execPath, err := os.Executable()
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	fmt.Printf("Exec path: %s\n", execPath)
+
+// 	dir := http.Dir("goa-calc/swagger")
+
+// 	handler := http.StripPrefix("/swagger/", http.FileServer(dir))
+// 	mux.Handle(http.MethodGet, "/swagger/", func(w http.ResponseWriter, r *http.Request) {
 // 		fmt.Printf("%v\n", r)
 // 		handler.ServeHTTP(w, r)
 // 	})
-// 	mux.Handle(http.MethodGet, "/swaggerui/{file}", func(w http.ResponseWriter, r *http.Request) {
+// 	mux.Handle(http.MethodGet, "/swagger/{file}", func(w http.ResponseWriter, r *http.Request) {
 // 		fmt.Println(r)
 // 		handler.ServeHTTP(w, r)
 // 	})
 // }
 
-func serveFile(mux goahttp.Muxer) {
-	// httpswagger.Handler(
-	// 	httpswagger.URL("http://localhost:8080/swagger/openapi3.json")
-	// )
-	mux.Handle(http.MethodGet, "/swagger/*", httpswagger.Handler(
-		httpswagger.URL("http://localhost:8080/swagger/openapi3.json"),
-	))
-	dir := http.Dir("goa-calc/gen/http")
+// FileExists returns a bool indicating whether a file exists or not. Also
+// in the case the input filename is a directory, even if it "exists", the function
+// will also return false as it is not a file
+func FileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
 
-	handler := http.StripPrefix("/swagger/", http.FileServer(dir))
+var bufferedSwaggerFile map[string]interface{}
+
+func serveSwaggerUI(swaggerFilePath, externalURL string, mux goahttp.Muxer) {
+	if !FileExists(swaggerFilePath) {
+		fmt.Printf("Swagger file %s does not exist.\n", swaggerFilePath)
+		return
+	}
+	swaggerFile, err := os.Open(swaggerFilePath)
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.NewDecoder(swaggerFile).Decode(&bufferedSwaggerFile)
+	if err != nil {
+		panic(err)
+	}
+	//,"servers":[{"url":"http://localhost:80","description":"Default server for calc"
+	bufferedSwaggerFile["servers"] = []map[string]string{
+		{
+			"url": externalURL,
+		},
+	}
+
 	mux.Handle(http.MethodGet, "/swagger/openapi3.json", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("%v\n", r)
-		handler.ServeHTTP(w, r)
+		fmt.Println("MPIKE STIN SERVE FILE TOU OPENAPI3.JSON")
+		err = json.NewEncoder(w).Encode(bufferedSwaggerFile)
+		if err != nil {
+			panic(err)
+		}
+		//http.ServeFile(w, r, swaggerFilePath)
 	})
+
+	swaggerUIOpts := goopenapi.SwaggerUIOpts{
+		Path:    "/swagger",
+		SpecURL: externalURL + "/swagger/openapi3.json",
+	}
+	swaggerHandler := goopenapi.SwaggerUI(swaggerUIOpts, mux)
+	mux.Handle(http.MethodGet, "/swagger", swaggerHandler.ServeHTTP)
 }
