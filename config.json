@@ -1,0 +1,4 @@
+{
+    "swagger_file": "/home/cpatsonakis/repos/git/cpatsonakis/goa-calc-example/goa-calc/gen/http/openapi3.json",
+    "external_endpoint": "http://chpats.dlt.iti.gr:8080"
+}

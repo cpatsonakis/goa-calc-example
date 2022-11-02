@@ -2,20 +2,21 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"sync"
+	"syscall"
 	"time"
 
+	"github.com/cpatsonakis/goa-calc-example/config"
 	"github.com/cpatsonakis/goa-calc-example/goa-calc/errorformat"
 	calc "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/calc"
 	calcsvr "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/http/calc/server"
 	docssvr "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/http/docs/server"
-	goopenapi "github.com/go-openapi/runtime/middleware"
+	"github.com/cpatsonakis/goa-calc-example/swagger"
 	goahttp "goa.design/goa/v3/http"
 	httpmdlwr "goa.design/goa/v3/http/middleware"
 	"goa.design/goa/v3/middleware"
@@ -23,7 +24,9 @@ import (
 
 // handleHTTPServer starts configures and starts a HTTP server on the given
 // URL. It shuts down the server if any error is received in the error channel.
-func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
+func handleHTTPServer(ctx context.Context, u *url.URL, configSvc config.Service,
+	calcEndpoints *calc.Endpoints,
+	wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
 
 	// Setup goa log adapter.
 	var (
@@ -54,18 +57,28 @@ func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpo
 	// the service input and output data structures to HTTP requests and
 	// responses.
 	var (
-		calcServer *calcsvr.Server
-		docsServer *docssvr.Server
+		calcServer    *calcsvr.Server
+		docsServer    *docssvr.Server
+		swaggerServer *swagger.Server
+		err           error
 	)
 	{
 		eh := errorHandler(logger)
 		ef := errorformat.ErrorFormatter(logger)
 		calcServer = calcsvr.New(calcEndpoints, mux, dec, enc, eh, ef)
 		docsServer = docssvr.New(nil, mux, dec, enc, eh, ef, nil, nil)
+		swaggerServer, err = swagger.New(mux, dec, enc,
+			configSvc.GetConfig().ExternalEndpoint,
+			configSvc.GetConfig().SwaggerFile)
+		if err != nil {
+			logger.Println(fmt.Errorf("error initializing swagger server: %w", err))
+			syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+		}
 		if debug {
 			servers := goahttp.Servers{
 				calcServer,
 				docsServer,
+				swaggerServer,
 			}
 			servers.Use(httpmdlwr.Debug(mux, os.Stdout))
 		}
@@ -73,9 +86,7 @@ func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpo
 	// Configure the mux.
 	calcsvr.Mount(mux, calcServer)
 	docssvr.Mount(mux, docsServer)
-	//serveSwaggerUI(mux)
-	serveSwaggerUI("/home/kasdeya/repos/git/cpatsonakis/goa-calc-example/goa-calc/gen/http/openapi3.json",
-		"http://localhost:8080", mux)
+	swagger.Mount(mux, swaggerServer)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
 	// here apply to all the service endpoints.
@@ -92,6 +103,9 @@ func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpo
 		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 	}
 	for _, m := range docsServer.Mounts {
+		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
+	}
+	for _, m := range swaggerServer.Mounts {
 		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 	}
 
@@ -128,81 +142,4 @@ func errorHandler(logger *log.Logger) func(context.Context, http.ResponseWriter,
 		_, _ = w.Write([]byte("[" + id + "] encoding: " + err.Error()))
 		logger.Printf("[%s] ERROR: %s", id, err.Error())
 	}
-}
-
-// func serveSwaggerUI(mux goahttp.Muxer) {
-// 	dirString, err := os.Getwd()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	fmt.Printf("Current wd: %s\n", dirString)
-
-// 	execPath, err := os.Executable()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	fmt.Printf("Exec path: %s\n", execPath)
-
-// 	dir := http.Dir("goa-calc/swagger")
-
-// 	handler := http.StripPrefix("/swagger/", http.FileServer(dir))
-// 	mux.Handle(http.MethodGet, "/swagger/", func(w http.ResponseWriter, r *http.Request) {
-// 		fmt.Printf("%v\n", r)
-// 		handler.ServeHTTP(w, r)
-// 	})
-// 	mux.Handle(http.MethodGet, "/swagger/{file}", func(w http.ResponseWriter, r *http.Request) {
-// 		fmt.Println(r)
-// 		handler.ServeHTTP(w, r)
-// 	})
-// }
-
-// FileExists returns a bool indicating whether a file exists or not. Also
-// in the case the input filename is a directory, even if it "exists", the function
-// will also return false as it is not a file
-func FileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}
-
-var bufferedSwaggerFile map[string]interface{}
-
-func serveSwaggerUI(swaggerFilePath, externalURL string, mux goahttp.Muxer) {
-	if !FileExists(swaggerFilePath) {
-		fmt.Printf("Swagger file %s does not exist.\n", swaggerFilePath)
-		return
-	}
-	swaggerFile, err := os.Open(swaggerFilePath)
-	if err != nil {
-		panic(err)
-	}
-
-	err = json.NewDecoder(swaggerFile).Decode(&bufferedSwaggerFile)
-	if err != nil {
-		panic(err)
-	}
-	//,"servers":[{"url":"http://localhost:80","description":"Default server for calc"
-	bufferedSwaggerFile["servers"] = []map[string]string{
-		{
-			"url": externalURL,
-		},
-	}
-
-	mux.Handle(http.MethodGet, "/swagger/openapi3.json", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("MPIKE STIN SERVE FILE TOU OPENAPI3.JSON")
-		err = json.NewEncoder(w).Encode(bufferedSwaggerFile)
-		if err != nil {
-			panic(err)
-		}
-		//http.ServeFile(w, r, swaggerFilePath)
-	})
-
-	swaggerUIOpts := goopenapi.SwaggerUIOpts{
-		Path:    "/swagger",
-		SpecURL: externalURL + "/swagger/openapi3.json",
-	}
-	swaggerHandler := goopenapi.SwaggerUI(swaggerUIOpts, mux)
-	mux.Handle(http.MethodGet, "/swagger", swaggerHandler.ServeHTTP)
 }

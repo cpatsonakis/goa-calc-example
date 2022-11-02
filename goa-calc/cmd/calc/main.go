@@ -12,6 +12,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/cpatsonakis/goa-calc-example/config"
 	calcapi "github.com/cpatsonakis/goa-calc-example/goa-calc"
 	calc "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/calc"
 )
@@ -20,11 +21,12 @@ func main() {
 	// Define command line flags, add any other flag required to configure the
 	// service.
 	var (
-		hostF     = flag.String("host", "localhost", "Server host (valid values: localhost)")
-		domainF   = flag.String("domain", "", "Host domain name (overrides host domain specified in service design)")
-		httpPortF = flag.String("http-port", "", "HTTP port (overrides host HTTP port specified in service design)")
-		secureF   = flag.Bool("secure", false, "Use secure scheme (https or grpcs)")
-		dbgF      = flag.Bool("debug", false, "Log request and response bodies")
+		hostF      = flag.String("host", "localhost", "Server host (valid values: localhost)")
+		domainF    = flag.String("domain", "", "Host domain name (overrides host domain specified in service design)")
+		httpPortF  = flag.String("http-port", "", "HTTP port (overrides host HTTP port specified in service design)")
+		secureF    = flag.Bool("secure", false, "Use secure scheme (https or grpcs)")
+		dbgF       = flag.Bool("debug", false, "Log request and response bodies")
+		configFile = flag.String("config", "config.json", "Goa calculator service configuration file path")
 	)
 	flag.Parse()
 
@@ -38,10 +40,16 @@ func main() {
 
 	// Initialize the services.
 	var (
-		calcSvc calc.Service
+		calcSvc   calc.Service
+		configSvc config.Service
+		err       error
 	)
 	{
 		calcSvc = calcapi.NewCalc(logger)
+		configSvc, err = config.NewConfig(*configFile)
+		if err != nil {
+			logger.Fatalf("%s\n", fmt.Errorf("error initializing config service: %w", err))
+		}
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
@@ -92,7 +100,7 @@ func main() {
 			} else if u.Port() == "" {
 				u.Host = net.JoinHostPort(u.Host, "80")
 			}
-			handleHTTPServer(ctx, u, calcEndpoints, &wg, errc, logger, *dbgF)
+			handleHTTPServer(ctx, u, configSvc, calcEndpoints, &wg, errc, logger, *dbgF)
 		}
 
 	default:

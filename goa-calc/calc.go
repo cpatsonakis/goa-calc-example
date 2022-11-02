@@ -29,7 +29,6 @@ func (s *calcsrvc) Multiply(ctx context.Context, p *calc.MultiplicationPayload) 
 		ok        bool
 	)
 	if requestId, ok = ctx.Value(middleware.RequestIDKey).(string); !ok {
-		log.Println("Paei na epistrepsei error apo to calc.multiply...")
 		return "", &calc.ErrorResultType{
 			Name:      errorformat.InternalServerErrorName,
 			Message:   "Failed to extract requestId from request context.",
