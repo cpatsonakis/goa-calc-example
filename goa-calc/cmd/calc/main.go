@@ -26,7 +26,7 @@ func main() {
 		httpPortF  = flag.String("http-port", "", "HTTP port (overrides host HTTP port specified in service design)")
 		secureF    = flag.Bool("secure", false, "Use secure scheme (https or grpcs)")
 		dbgF       = flag.Bool("debug", false, "Log request and response bodies")
-		configFile = flag.String("config", "config.json", "Goa calculator service configuration file path")
+		configFile = flag.String("config", "goa-calc/config.json", "Goa calculator service configuration file path")
 	)
 	flag.Parse()
 

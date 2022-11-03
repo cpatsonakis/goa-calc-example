@@ -16,7 +16,7 @@ import (
 	calc "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/calc"
 	calcsvr "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/http/calc/server"
 	docssvr "github.com/cpatsonakis/goa-calc-example/goa-calc/gen/http/docs/server"
-	"github.com/cpatsonakis/goa-calc-example/swagger"
+	"github.com/cpatsonakis/goa-calc-example/openapiui"
 	goahttp "goa.design/goa/v3/http"
 	httpmdlwr "goa.design/goa/v3/http/middleware"
 	"goa.design/goa/v3/middleware"
@@ -59,7 +59,8 @@ func handleHTTPServer(ctx context.Context, u *url.URL, configSvc config.Service,
 	var (
 		calcServer    *calcsvr.Server
 		docsServer    *docssvr.Server
-		swaggerServer *swagger.Server
+		swaggerServer openapiui.Server
+		redocServer   openapiui.Server
 		err           error
 	)
 	{
@@ -67,18 +68,28 @@ func handleHTTPServer(ctx context.Context, u *url.URL, configSvc config.Service,
 		ef := errorformat.ErrorFormatter(logger)
 		calcServer = calcsvr.New(calcEndpoints, mux, dec, enc, eh, ef)
 		docsServer = docssvr.New(nil, mux, dec, enc, eh, ef, nil, nil)
-		swaggerServer, err = swagger.New(mux, dec, enc,
+		swaggerServer, err = openapiui.NewSwaggerUIServer(mux, dec, enc,
 			configSvc.GetConfig().ExternalEndpoint,
 			configSvc.GetConfig().SwaggerFile)
 		if err != nil {
 			logger.Println(fmt.Errorf("error initializing swagger server: %w", err))
 			syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 		}
+
+		redocServer, err = openapiui.NewRedocUIServer(mux, dec, enc,
+			configSvc.GetConfig().ExternalEndpoint,
+			configSvc.GetConfig().SwaggerFile)
+		if err != nil {
+			logger.Println(fmt.Errorf("error initializing redoc server: %w", err))
+			syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+		}
+
 		if debug {
 			servers := goahttp.Servers{
 				calcServer,
 				docsServer,
 				swaggerServer,
+				redocServer,
 			}
 			servers.Use(httpmdlwr.Debug(mux, os.Stdout))
 		}
@@ -86,7 +97,8 @@ func handleHTTPServer(ctx context.Context, u *url.URL, configSvc config.Service,
 	// Configure the mux.
 	calcsvr.Mount(mux, calcServer)
 	docssvr.Mount(mux, docsServer)
-	swagger.Mount(mux, swaggerServer)
+	openapiui.Mount(mux, swaggerServer)
+	openapiui.Mount(mux, redocServer)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
 	// here apply to all the service endpoints.
@@ -105,7 +117,12 @@ func handleHTTPServer(ctx context.Context, u *url.URL, configSvc config.Service,
 	for _, m := range docsServer.Mounts {
 		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 	}
-	for _, m := range swaggerServer.Mounts {
+	swaggerServerMount := swaggerServer.GetMountPoints()
+	for _, m := range swaggerServerMount {
+		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
+	}
+	redocServerMount := redocServer.GetMountPoints()
+	for _, m := range redocServerMount {
 		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 	}
 
