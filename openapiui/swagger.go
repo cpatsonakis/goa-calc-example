@@ -38,7 +38,7 @@ func NewSwaggerUIServer(
 }
 
 // Service returns the name of the service served.
-func (s *swaggerUIServer) Service() string { return "swagger" }
+func (s swaggerUIServer) Service() string { return "swagger" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *swaggerUIServer) Use(m func(http.Handler) http.Handler) {
@@ -51,23 +51,23 @@ func (s *swaggerUIServer) Mount(mux goahttp.Muxer) {
 	Mount(mux, s)
 }
 
-func (s *swaggerUIServer) GetMountPoints() []*MountPoint {
+func (s swaggerUIServer) GetMountPoints() []*MountPoint {
 	return s.baseServer.mounts
 }
 
-func (s *swaggerUIServer) GetOpenAPIFileHandler() http.Handler {
+func (s swaggerUIServer) GetOpenAPIFileHandler() http.Handler {
 	return s.baseServer.openAPIFileHandler
 }
 
-func (s *swaggerUIServer) GetOpenAPIUIHandler() http.Handler {
+func (s swaggerUIServer) GetOpenAPIUIHandler() http.Handler {
 	return s.baseServer.openAPIUIHandler
 }
 
-func (s *swaggerUIServer) GetOpenAPIUIEndpoint() string {
+func (s swaggerUIServer) GetOpenAPIUIEndpoint() string {
 	return swaggerUIEndpoint
 }
 
-func (s *swaggerUIServer) GetOpenAPIFileEndpoint() string {
+func (s swaggerUIServer) GetOpenAPIFileEndpoint() string {
 	return s.baseServer.openAPIFileEndpoint
 }
 

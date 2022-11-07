@@ -68,12 +68,14 @@ func handleHTTPServer(ctx context.Context, u *url.URL, configSvc config.Service,
 		ef := errorformat.ErrorFormatter(logger)
 		calcServer = calcsvr.New(calcEndpoints, mux, dec, enc, eh, ef)
 		docsServer = docssvr.New(nil, mux, dec, enc, eh, ef, nil, nil)
+
 		swaggerServer, err = openapiui.NewSwaggerUIServer(mux, dec, enc,
 			configSvc.GetConfig().ExternalEndpoint,
 			configSvc.GetConfig().SwaggerFile)
 		if err != nil {
 			logger.Println(fmt.Errorf("error initializing swagger server: %w", err))
 			syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+			return
 		}
 
 		redocServer, err = openapiui.NewRedocUIServer(mux, dec, enc,
@@ -82,6 +84,7 @@ func handleHTTPServer(ctx context.Context, u *url.URL, configSvc config.Service,
 		if err != nil {
 			logger.Println(fmt.Errorf("error initializing redoc server: %w", err))
 			syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+			return
 		}
 
 		if debug {

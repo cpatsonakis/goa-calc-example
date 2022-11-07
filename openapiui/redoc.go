@@ -38,7 +38,7 @@ func NewRedocUIServer(
 }
 
 // Service returns the name of the service served.
-func (s *redocUIServer) Service() string { return "redoc" }
+func (s redocUIServer) Service() string { return "redoc" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *redocUIServer) Use(m func(http.Handler) http.Handler) {
@@ -51,23 +51,23 @@ func (s *redocUIServer) Mount(mux goahttp.Muxer) {
 	Mount(mux, s)
 }
 
-func (s *redocUIServer) GetMountPoints() []*MountPoint {
+func (s redocUIServer) GetMountPoints() []*MountPoint {
 	return s.baseServer.mounts
 }
 
-func (s *redocUIServer) GetOpenAPIFileHandler() http.Handler {
+func (s redocUIServer) GetOpenAPIFileHandler() http.Handler {
 	return s.baseServer.openAPIFileHandler
 }
 
-func (s *redocUIServer) GetOpenAPIUIHandler() http.Handler {
+func (s redocUIServer) GetOpenAPIUIHandler() http.Handler {
 	return s.baseServer.openAPIUIHandler
 }
 
-func (s *redocUIServer) GetOpenAPIUIEndpoint() string {
+func (s redocUIServer) GetOpenAPIUIEndpoint() string {
 	return redocUIEndpoint
 }
 
-func (s *redocUIServer) GetOpenAPIFileEndpoint() string {
+func (s redocUIServer) GetOpenAPIFileEndpoint() string {
 	return s.baseServer.openAPIFileEndpoint
 }
 

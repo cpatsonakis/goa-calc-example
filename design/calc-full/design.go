@@ -2,6 +2,7 @@ package design
 
 import (
 	. "goa.design/goa/v3/dsl"
+	cors "goa.design/plugins/v3/cors/dsl"
 )
 
 var _ = API("calculator", func() {
@@ -22,6 +23,12 @@ var _ = API("calculator", func() {
 	Docs(func() {
 		Description("Looking for documentation? Well, there isn't one!")
 		URL("http://there-is-no-documentation.com")
+	})
+	cors.Origin("*", func() {
+		cors.Methods("GET", "POST")
+		cors.Headers("*")
+		cors.Credentials()
+		cors.MaxAge(600)
 	})
 	Server("calculator-server", func() {
 		Description("The calculator-server hosts the Legendary Calculator Service.")
@@ -55,74 +62,4 @@ var GenericHTTPError = Type("GenericHTTPError", func() {
 	})
 
 	Required("name", "message", "occured_at")
-})
-
-var AdditionPayload = Type("AdditionPayload", func() {
-	Description("Type used by the add method containing both addition operands.")
-
-	Attribute("a", Int64, "First operand of addition payload")
-	Attribute("b", Int64, "Second operand of addition payload")
-
-	Required("a", "b")
-})
-
-var MultiplicationPayload = Type("MultiplicationPayload", func() {
-	Description("Type used by the multiply method containing both multiplication operands.")
-
-	Attribute("a", Int64, "First operand of multiplication payload")
-	Attribute("b", Int64, "Second operand of multiplication payload")
-
-	Required("a", "b")
-})
-
-var _ = Service("calculator", func() {
-	Description("The calculator service performs legendary mathematical operations on numbers.")
-
-	Docs(func() {
-		Description("Specification")
-		URL("http://there-is-no-documentation-for-calculator.com")
-	})
-
-	Error("internal_error", GenericHTTPError)
-	Error("bad_request", GenericHTTPError)
-
-	Method("add", func() {
-		Description("Addition of two numbers.")
-
-		Docs(func() {
-			Description("Addition documentation.")
-			URL("http://there-is-no-documentation-for-addition.com")
-		})
-
-		Payload(AdditionPayload, "First and second addition operands.", func() {
-			Description("First and second addition operands.")
-			Required("a", "b")
-		})
-
-		Result(Int64)
-
-		HTTP(func() {
-			GET("/add/{a}/{b}")
-		})
-	})
-
-	Method("multiply", func() {
-		Description("Multiplication of two numbers.")
-
-		Docs(func() {
-			Description("Multiplication documentation.")
-			URL("http://there-is-no-documentation-for-multiplication.com")
-		})
-
-		Payload(MultiplicationPayload, "First and second multiplication operands.", func() {
-			Description("First and second multiplication operands.")
-			Required("a", "b")
-		})
-
-		Result(Int64)
-
-		HTTP(func() {
-			GET("/mul/{a}/{b}")
-		})
-	})
 })
