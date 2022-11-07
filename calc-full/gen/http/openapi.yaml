@@ -1,0 +1,464 @@
+swagger: "2.0"
+info:
+    title: Legendary Integer Calculator Service
+    description: A completely legendary, innovative and ingenious web service that provides REST-based, integer calculator functionality.
+    termsOfService: http://there-are-no-terms-of-service.com
+    contact:
+        name: Christos Patsonakis
+        email: cpatsonakis@iti.gr
+        url: https://github.com/cpatsonakis
+    license:
+        name: None License
+        url: http://there-is-no-license.com
+    version: 0.0.1
+host: localhost:80
+consumes:
+    - application/json
+    - application/xml
+    - application/gob
+produces:
+    - application/json
+    - application/xml
+    - application/gob
+paths:
+    /calculator/add/{a}/{b}:
+        post:
+            tags:
+                - calculator
+            summary: Integer addition
+            description: Addition of two integers.
+            externalDocs:
+                description: Addition documentation.
+                url: http://there-is-no-documentation-for-addition.com
+            operationId: calculator#add
+            produces:
+                - text/plain
+            parameters:
+                - name: a
+                  in: path
+                  description: First operand of addition payload
+                  required: true
+                  type: integer
+                  format: int64
+                - name: b
+                  in: path
+                  description: Second operand of addition payload
+                  required: true
+                  type: integer
+                  format: int64
+            responses:
+                "200":
+                    description: Successful integer addition response.
+                    schema:
+                        type: string
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/CalculatorAddBadRequestResponseBody'
+                        required:
+                            - name
+                            - message
+                            - occured_at
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/CalculatorAddInternalServerErrorResponseBody'
+                        required:
+                            - name
+                            - message
+                            - occured_at
+            schemes:
+                - http
+    /calculator/div/{a}/{b}:
+        post:
+            tags:
+                - calculator
+            summary: Integer division
+            description: Division of two numbers.
+            externalDocs:
+                description: Division documentation.
+                url: http://there-is-no-documentation-for-division.com
+            operationId: calculator#divide
+            parameters:
+                - name: a
+                  in: path
+                  description: First operand (nominator) of division payload
+                  required: true
+                  type: integer
+                  format: int64
+                - name: b
+                  in: path
+                  description: Second operand (denominator) of division payload
+                  required: true
+                  type: integer
+                  format: int64
+            responses:
+                "200":
+                    description: Successful integer division response.
+                    schema:
+                        $ref: '#/definitions/CalculatorDivideResponseBody'
+                        required:
+                            - q
+                            - r
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/CalculatorDivideBadRequestResponseBody'
+                        required:
+                            - name
+                            - message
+                            - occured_at
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/CalculatorDivideInternalServerErrorResponseBody'
+                        required:
+                            - name
+                            - message
+                            - occured_at
+            schemes:
+                - http
+    /calculator/mul/{a}/{b}:
+        post:
+            tags:
+                - calculator
+            summary: Integer multiplication
+            description: Multiplication of two numbers.
+            externalDocs:
+                description: Multiplication documentation.
+                url: http://there-is-no-documentation-for-multiplication.com
+            operationId: calculator#multiply
+            produces:
+                - text/plain
+            parameters:
+                - name: a
+                  in: path
+                  description: First operand of multiplication payload
+                  required: true
+                  type: integer
+                  format: int64
+                - name: b
+                  in: path
+                  description: Second operand of multiplication payload
+                  required: true
+                  type: integer
+                  format: int64
+            responses:
+                "200":
+                    description: Successful integer multiplication response.
+                    schema:
+                        type: string
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/CalculatorMultiplyBadRequestResponseBody'
+                        required:
+                            - name
+                            - message
+                            - occured_at
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/CalculatorMultiplyInternalServerErrorResponseBody'
+                        required:
+                            - name
+                            - message
+                            - occured_at
+            schemes:
+                - http
+    /calculator/sub/{a}/{b}:
+        post:
+            tags:
+                - calculator
+            summary: Integer subtraction
+            description: Subtraction of two numbers.
+            externalDocs:
+                description: Subtraction documentation.
+                url: http://there-is-no-documentation-for-subtraction.com
+            operationId: calculator#subtract
+            produces:
+                - text/plain
+            parameters:
+                - name: a
+                  in: path
+                  description: First operand of subtraction payload
+                  required: true
+                  type: integer
+                  format: int64
+                - name: b
+                  in: path
+                  description: Second operand of subtraction payload
+                  required: true
+                  type: integer
+                  format: int64
+            responses:
+                "200":
+                    description: Successful integer subtraction response.
+                    schema:
+                        type: string
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/CalculatorSubtractBadRequestResponseBody'
+                        required:
+                            - name
+                            - message
+                            - occured_at
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/CalculatorSubtractInternalServerErrorResponseBody'
+                        required:
+                            - name
+                            - message
+                            - occured_at
+            schemes:
+                - http
+definitions:
+    CalculatorAddBadRequestResponseBody:
+        title: CalculatorAddBadRequestResponseBody
+        type: object
+        properties:
+            message:
+                type: string
+                description: Descriptive error message.
+                example: Something went wrong.
+            name:
+                type: string
+                description: Name of the error.
+                example: bad_request
+                enum:
+                    - bad_request
+                    - internal_error
+            occured_at:
+                type: string
+                description: Timestamp of error's occurence.
+                example: "2006-09-21T08:21:19Z"
+                format: date-time
+        example:
+            message: Something went wrong.
+            name: internal_error
+            occured_at: "1983-11-26T02:40:05Z"
+        required:
+            - name
+            - message
+            - occured_at
+    CalculatorAddInternalServerErrorResponseBody:
+        title: CalculatorAddInternalServerErrorResponseBody
+        type: object
+        properties:
+            message:
+                type: string
+                description: Descriptive error message.
+                example: Something went wrong.
+            name:
+                type: string
+                description: Name of the error.
+                example: bad_request
+                enum:
+                    - bad_request
+                    - internal_error
+            occured_at:
+                type: string
+                description: Timestamp of error's occurence.
+                example: "2011-10-16T03:54:41Z"
+                format: date-time
+        example:
+            message: Something went wrong.
+            name: internal_error
+            occured_at: "2005-07-03T04:09:49Z"
+        required:
+            - name
+            - message
+            - occured_at
+    CalculatorDivideBadRequestResponseBody:
+        title: CalculatorDivideBadRequestResponseBody
+        type: object
+        properties:
+            message:
+                type: string
+                description: Descriptive error message.
+                example: Something went wrong.
+            name:
+                type: string
+                description: Name of the error.
+                example: bad_request
+                enum:
+                    - bad_request
+                    - internal_error
+            occured_at:
+                type: string
+                description: Timestamp of error's occurence.
+                example: "1999-10-08T15:14:50Z"
+                format: date-time
+        example:
+            message: Something went wrong.
+            name: bad_request
+            occured_at: "1981-09-07T22:33:23Z"
+        required:
+            - name
+            - message
+            - occured_at
+    CalculatorDivideInternalServerErrorResponseBody:
+        title: CalculatorDivideInternalServerErrorResponseBody
+        type: object
+        properties:
+            message:
+                type: string
+                description: Descriptive error message.
+                example: Something went wrong.
+            name:
+                type: string
+                description: Name of the error.
+                example: internal_error
+                enum:
+                    - bad_request
+                    - internal_error
+            occured_at:
+                type: string
+                description: Timestamp of error's occurence.
+                example: "2012-07-22T22:37:29Z"
+                format: date-time
+        example:
+            message: Something went wrong.
+            name: internal_error
+            occured_at: "1991-03-23T00:22:03Z"
+        required:
+            - name
+            - message
+            - occured_at
+    CalculatorDivideResponseBody:
+        title: CalculatorDivideResponseBody
+        type: object
+        properties:
+            q:
+                type: integer
+                description: Integer division quotient
+                example: 4
+                format: int64
+            r:
+                type: integer
+                description: Integer division remainder
+                example: 0
+                format: int64
+        example:
+            q: 4
+            r: 0
+        required:
+            - q
+            - r
+    CalculatorMultiplyBadRequestResponseBody:
+        title: CalculatorMultiplyBadRequestResponseBody
+        type: object
+        properties:
+            message:
+                type: string
+                description: Descriptive error message.
+                example: Something went wrong.
+            name:
+                type: string
+                description: Name of the error.
+                example: bad_request
+                enum:
+                    - bad_request
+                    - internal_error
+            occured_at:
+                type: string
+                description: Timestamp of error's occurence.
+                example: "1970-10-08T17:43:30Z"
+                format: date-time
+        example:
+            message: Something went wrong.
+            name: bad_request
+            occured_at: "1972-11-26T05:00:23Z"
+        required:
+            - name
+            - message
+            - occured_at
+    CalculatorMultiplyInternalServerErrorResponseBody:
+        title: CalculatorMultiplyInternalServerErrorResponseBody
+        type: object
+        properties:
+            message:
+                type: string
+                description: Descriptive error message.
+                example: Something went wrong.
+            name:
+                type: string
+                description: Name of the error.
+                example: bad_request
+                enum:
+                    - bad_request
+                    - internal_error
+            occured_at:
+                type: string
+                description: Timestamp of error's occurence.
+                example: "1994-03-26T04:57:02Z"
+                format: date-time
+        example:
+            message: Something went wrong.
+            name: bad_request
+            occured_at: "2007-04-28T10:46:40Z"
+        required:
+            - name
+            - message
+            - occured_at
+    CalculatorSubtractBadRequestResponseBody:
+        title: CalculatorSubtractBadRequestResponseBody
+        type: object
+        properties:
+            message:
+                type: string
+                description: Descriptive error message.
+                example: Something went wrong.
+            name:
+                type: string
+                description: Name of the error.
+                example: internal_error
+                enum:
+                    - bad_request
+                    - internal_error
+            occured_at:
+                type: string
+                description: Timestamp of error's occurence.
+                example: "1998-01-01T07:30:10Z"
+                format: date-time
+        example:
+            message: Something went wrong.
+            name: internal_error
+            occured_at: "1987-08-25T23:27:59Z"
+        required:
+            - name
+            - message
+            - occured_at
+    CalculatorSubtractInternalServerErrorResponseBody:
+        title: CalculatorSubtractInternalServerErrorResponseBody
+        type: object
+        properties:
+            message:
+                type: string
+                description: Descriptive error message.
+                example: Something went wrong.
+            name:
+                type: string
+                description: Name of the error.
+                example: bad_request
+                enum:
+                    - bad_request
+                    - internal_error
+            occured_at:
+                type: string
+                description: Timestamp of error's occurence.
+                example: "1979-12-16T14:37:04Z"
+                format: date-time
+        example:
+            message: Something went wrong.
+            name: internal_error
+            occured_at: "1973-06-25T09:02:45Z"
+        required:
+            - name
+            - message
+            - occured_at
+externalDocs:
+    description: Looking for documentation? Well, there isn't one!
+    url: http://there-is-no-documentation.com

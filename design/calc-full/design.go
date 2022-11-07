@@ -6,9 +6,9 @@ import (
 )
 
 var _ = API("calculator", func() {
-	Title("Legendary Calculator REST-based Service")
+	Title("Legendary Integer Calculator Service")
 	Description("A completely legendary, innovative and ingenious web service that " +
-		"provides REST-based calculator functionality.")
+		"provides REST-based, integer calculator functionality.")
 	Version("0.0.1")
 	TermsOfService("http://there-are-no-terms-of-service.com")
 	Contact(func() {
@@ -17,7 +17,7 @@ var _ = API("calculator", func() {
 		URL("https://github.com/cpatsonakis")
 	})
 	License(func() {
-		Name("None")
+		Name("None License")
 		URL("http://there-is-no-license.com")
 	})
 	Docs(func() {
@@ -30,36 +30,4 @@ var _ = API("calculator", func() {
 		cors.Credentials()
 		cors.MaxAge(600)
 	})
-	Server("calculator-server", func() {
-		Description("The calculator-server hosts the Legendary Calculator Service.")
-
-		Services("calculator")
-
-		// Host("production-only", func() {
-		// 	Description("We only build production-oriented stuff.")
-
-		// 	URI("http://{domain}/calc")
-
-		// 	Variable("domain", String, "Domain Name", func() {
-		// 		Default("localhost:8080")
-		// 	})
-		// })
-
-		// Host("development", func() {
-		// 	Description("Development server host.")
-
-		// 	URI("http://localhost:8080/calc")
-		// })
-	})
-})
-
-var GenericHTTPError = Type("GenericHTTPError", func() {
-	ErrorName("name", String, "String-encoded error name.")
-	Attribute("code", Int64, "Integer-encoded error")
-	Attribute("message", String, "Descriptive error message.")
-	Attribute("occured_at", String, "Timestamp of error's occurence", func() {
-		Format(FormatDateTime)
-	})
-
-	Required("name", "message", "occured_at")
 })

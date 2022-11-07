@@ -1,0 +1,280 @@
+openapi: 3.0.3
+info:
+    title: Legendary Integer Calculator Service
+    description: A completely legendary, innovative and ingenious web service that provides REST-based, integer calculator functionality.
+    termsOfService: http://there-are-no-terms-of-service.com
+    contact:
+        name: Christos Patsonakis
+        url: https://github.com/cpatsonakis
+        email: cpatsonakis@iti.gr
+    license:
+        name: None License
+        url: http://there-is-no-license.com
+    version: 0.0.1
+servers:
+    - url: http://localhost:80
+      description: Default server for calculator
+paths:
+    /calculator/add/{a}/{b}:
+        post:
+            tags:
+                - calculator
+            summary: Integer addition
+            description: Addition of two integers.
+            operationId: calculator#add
+            parameters:
+                - name: a
+                  in: path
+                  description: First operand of addition payload
+                  required: true
+                  schema:
+                    type: integer
+                    description: First operand of addition payload
+                    example: 3
+                    format: int64
+                  example: 3
+                - name: b
+                  in: path
+                  description: Second operand of addition payload
+                  required: true
+                  schema:
+                    type: integer
+                    description: Second operand of addition payload
+                    example: 5
+                    format: int64
+                  example: 5
+            responses:
+                "200":
+                    description: Successful integer addition response.
+                    content:
+                        text/plain:
+                            schema:
+                                type: string
+                                description: Addition result.
+                                example: "8"
+                            example: "8"
+                "400":
+                    description: 'bad_request: Bad Request response.'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResultType'
+                "500":
+                    description: 'internal_server_error: Internal Server Error response.'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResultType'
+            externalDocs:
+                description: Addition documentation.
+                url: http://there-is-no-documentation-for-addition.com
+    /calculator/div/{a}/{b}:
+        post:
+            tags:
+                - calculator
+            summary: Integer division
+            description: Division of two numbers.
+            operationId: calculator#divide
+            parameters:
+                - name: a
+                  in: path
+                  description: First operand (nominator) of division payload
+                  required: true
+                  schema:
+                    type: integer
+                    description: First operand (nominator) of division payload
+                    example: 8
+                    format: int64
+                  example: 8
+                - name: b
+                  in: path
+                  description: Second operand (denominator) of division payload
+                  required: true
+                  schema:
+                    type: integer
+                    description: Second operand (denominator) of division payload
+                    example: 2
+                    format: int64
+                  example: 2
+            responses:
+                "200":
+                    description: Successful integer division response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DivisionResult'
+                            example:
+                                q: 4
+                                r: 0
+                "400":
+                    description: 'bad_request: Bad Request response.'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResultType'
+                "500":
+                    description: 'internal_server_error: Internal Server Error response.'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResultType'
+            externalDocs:
+                description: Division documentation.
+                url: http://there-is-no-documentation-for-division.com
+    /calculator/mul/{a}/{b}:
+        post:
+            tags:
+                - calculator
+            summary: Integer multiplication
+            description: Multiplication of two numbers.
+            operationId: calculator#multiply
+            parameters:
+                - name: a
+                  in: path
+                  description: First operand of multiplication payload
+                  required: true
+                  schema:
+                    type: integer
+                    description: First operand of multiplication payload
+                    example: 3
+                    format: int64
+                  example: 3
+                - name: b
+                  in: path
+                  description: Second operand of multiplication payload
+                  required: true
+                  schema:
+                    type: integer
+                    description: Second operand of multiplication payload
+                    example: 5
+                    format: int64
+                  example: 5
+            responses:
+                "200":
+                    description: Successful integer multiplication response.
+                    content:
+                        text/plain:
+                            schema:
+                                type: string
+                                description: Multiplication result.
+                                example: "15"
+                            example: "15"
+                "400":
+                    description: 'bad_request: Bad Request response.'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResultType'
+                "500":
+                    description: 'internal_server_error: Internal Server Error response.'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResultType'
+            externalDocs:
+                description: Multiplication documentation.
+                url: http://there-is-no-documentation-for-multiplication.com
+    /calculator/sub/{a}/{b}:
+        post:
+            tags:
+                - calculator
+            summary: Integer subtraction
+            description: Subtraction of two numbers.
+            operationId: calculator#subtract
+            parameters:
+                - name: a
+                  in: path
+                  description: First operand of subtraction payload
+                  required: true
+                  schema:
+                    type: integer
+                    description: First operand of subtraction payload
+                    example: 5
+                    format: int64
+                  example: 5
+                - name: b
+                  in: path
+                  description: Second operand of subtraction payload
+                  required: true
+                  schema:
+                    type: integer
+                    description: Second operand of subtraction payload
+                    example: 3
+                    format: int64
+                  example: 3
+            responses:
+                "200":
+                    description: Successful integer subtraction response.
+                    content:
+                        text/plain:
+                            schema:
+                                type: string
+                                description: Subtraction result.
+                                example: "2"
+                            example: "2"
+                "400":
+                    description: 'bad_request: Bad Request response.'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResultType'
+                "500":
+                    description: 'internal_server_error: Internal Server Error response.'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResultType'
+            externalDocs:
+                description: Subtraction documentation.
+                url: http://there-is-no-documentation-for-subtraction.com
+components:
+    schemas:
+        DivisionResult:
+            type: object
+            properties:
+                q:
+                    type: integer
+                    description: Integer division quotient
+                    example: 4
+                    format: int64
+                r:
+                    type: integer
+                    description: Integer division remainder
+                    example: 0
+                    format: int64
+            example:
+                q: 4
+                r: 0
+            required:
+                - q
+                - r
+        ErrorResultType:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: Descriptive error message.
+                    example: Something went wrong.
+                name:
+                    type: string
+                    description: Name of the error.
+                    example: internal_error
+                    enum:
+                        - bad_request
+                        - internal_error
+                occured_at:
+                    type: string
+                    description: Timestamp of error's occurence.
+                    example: "1971-03-12T14:13:41Z"
+                    format: date-time
+            example:
+                message: Something went wrong.
+                name: bad_request
+                occured_at: "1978-07-28T16:45:25Z"
+            required:
+                - name
+                - message
+                - occured_at
+tags:
+    - name: calculator
+      description: The calculator service performs legendary mathematical operations on integers.
